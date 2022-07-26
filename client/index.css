@@ -1,0 +1,14 @@
+:root {
+  background: url("./images/fondo.png");
+  --font-button: "Odibee Sans", cursive;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: var(--color-principal);
+}
+#root {
+  height: 100vh;
+}
