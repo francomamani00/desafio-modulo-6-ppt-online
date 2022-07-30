@@ -27,15 +27,17 @@ customElements.define(
       formEl?.addEventListener("submit", (e) => {
         e.preventDefault();
         const target = e.target as any;
-        console.log(target);
         currentState.roomId = target.input__codigo.value;
-        currentState.anotherPlayer = target.input__name.value;
-        roomRef;
-        state.signupPlayer2(() => {
-          state.signinPlayer2(() => {
-            state.prueba(() => {
-              state.listenRoom(() => {
-                state.addPlayerDos(() => {
+        currentState.nombre = target.input__name.value;
+
+        state.signup(() => {
+          console.log("set-name -> signup");
+          state.signin(() => {
+            console.log("set-name -> signin");
+            state.accessToRoom(() => {
+              console.log("set-name -> accesstoroom");
+              state.addPlayerDos(() => {
+                state.listenRoom(() => {
                   Router.go("/instructions-page");
                   console.log("connectroom-state", currentState);
                 });

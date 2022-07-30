@@ -28,10 +28,20 @@ customElements.define(
         state.setNombre(target.input.value);
         if (currentState.roomId == "") {
           state.signup(() => {
+            console.log("set-name -> signup");
+
             state.signin(() => {
+              console.log("set-name -> signin", currentState);
+
               state.askNewRoom(() => {
+                console.log("set-name -> asknewroom", currentState);
+
                 state.accessToRoom(() => {
+                  console.log("set-name -> accesstoroom");
+
                   state.listenRoom(() => {
+                    console.log("set-name -> listenRoom");
+
                     console.log(currentState);
 
                     Router.go("/share-id");

@@ -89,7 +89,14 @@ app.post("/rooms", (req, res) => {
     .get()
     .then((doc) => {
       const roomRef = rtdb.ref("/rooms/" + uuidv4());
-      console.log("player owner", doc.data(), "room", doc.id);
+      console.log(
+        "player owner",
+        doc.data(),
+        "playerid",
+        doc.id,
+        "room creado",
+        roomRef.key
+      );
       if (doc.exists) {
         roomRef
           .set({
@@ -151,7 +158,7 @@ app.post("/rooms/:rtdbRoomId", (req, res) => {
   const playersRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
 
   playersRef.once("value", (snapshot) => {
-    console.log("players", snapshot.val());
+    console.log("falta 1 player", snapshot.val());
     const players = snapshot.val();
     const playersList = map(players);
     console.log("playerlist[1]", playersList[1]);
@@ -166,6 +173,7 @@ app.post("/rooms/:rtdbRoomId", (req, res) => {
       player2Ref.update(playerAdded);
       res.json({ message: "player added", playerAdded });
     }
+    console.log("ambos metidos", players);
     // if (playersList.length >= 2) {
     //   return res
     //     .status(400)
@@ -189,14 +197,14 @@ app.post("/rooms/:rtdbRoomId", (req, res) => {
   });
 });
 //endpoint para obtener los jugadores de una rtdbRoomId ya creada
-app.get("/rooms/:rtdbRoomId", (req, res) => {
-  const { rtdbRoomId } = req.params;
-  const playersRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
-  playersRef.once("value", (snapshot) => {
-    const players = snapshot.val();
-    res.json(map(players));
-  });
-});
+// app.get("/rooms/:rtdbRoomId", (req, res) => {
+//   const { rtdbRoomId } = req.params;
+//   const playersRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
+//   playersRef.once("value", (snapshot) => {
+//     const players = snapshot.val();
+//     res.json(map(players));
+//   });
+// });
 let contador = 0;
 
 app.post("/rooms/:rtdbRoomId/players", (req, res) => {
@@ -262,18 +270,42 @@ app.post("/rooms/:rtdbRoomId/players", (req, res) => {
     });
   });
 });
-app.get("/rooms/:roomId", (req, res) => {
-  const { roomId } = req.params;
+// app.get("/rooms/:roomId", (req, res) => {
+//   const { roomId } = req.params;
+//   const { playerId } = req.query;
 
-  roomCollection
-    .doc(roomId)
+//   roomCollection
+//     .doc(roomId)
+//     .get()
+//     .then((snap) => {
+//       const data = snap.data();
+//       res.json({
+//         data,
+//         message: "hola",
+//       });
+//     });
+// });
+app.get("/rooms/:roomId", (req, res) => {
+  const { playerId } = req.query;
+  const { roomId } = req.params;
+  playersCollection
+    .doc(playerId.toString())
     .get()
-    .then((snap) => {
-      const data = snap.data();
-      res.json({
-        data,
-        message: "hola",
-      });
+    .then((doc) => {
+      if (doc.exists) {
+        roomCollection
+          .doc(roomId)
+          .get()
+          .then((snap) => {
+            const data = snap.data();
+            console.log(data);
+            res.json(data);
+          });
+      } else {
+        res.status(401).json({
+          messages: "noexistis",
+        });
+      }
     });
 });
 // const rutaRelativa = path.resolve(__dirname, "../dist/index.html");

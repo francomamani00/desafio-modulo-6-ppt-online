@@ -33,21 +33,26 @@ const state = {
       this.data = JSON.parse(localData);
     }
   },
-  listenRoom(cb) {
+  listenRoom(cb?) {
     const currentState = this.getState();
     const roomRef = ref(rtdb, "/rooms/" + currentState.rtdbRoomId + "/players");
     onValue(roomRef, (snapshot) => {
       const players = snapshot.val();
       const playersList = map(players);
       //esto invente yo
-      console.log(players[1]);
-      if (players[1].nombre != "") {
-        currentState.anotherPlayer = players[1].nombre;
-        currentState.anotherPlayerId = players[1].playerId;
-        currentState.anotherPlayerOnline = players[1].online;
-        currentState.anotherPlayerPlay = players[1].myPlay;
-        currentState.anotherStart = players[1].start;
-      }
+      console.log("jugadoresssss", players);
+      playersList.forEach((element, index) => {
+        if (element.nombre != currentState.nombre) {
+          currentState.anotherPlayer = players[1].nombre;
+          currentState.anotherPlayerId = players[1].playerId;
+          currentState.anotherPlayerOnline = players[1].online;
+          currentState.anotherPlayerPlay = players[1].myPlay;
+          currentState.anotherStart = players[1].start;
+        }
+      });
+      playersList.forEach((element, index) => {
+        console.log("for each: player->", element, "posicion", index);
+      });
       // playersList.forEach((element, index) => {
       //   if (element.nombre == currentState.nombre) {
       //     currentState.serverId = index.toString();
@@ -170,6 +175,7 @@ const state = {
   askNewRoom(cb?) {
     const currentState = this.getState();
     if (currentState.playerId) {
+      console.log("id del que crea la sala", currentState.playerId);
       fetch(API_BASE_URL + "/rooms", {
         method: "post",
         headers: {
@@ -178,7 +184,6 @@ const state = {
         body: JSON.stringify({
           playerId: currentState.playerId,
           nombre: currentState.nombre,
-          rtdbRoomId: currentState.rtdbRoomId,
         }),
       })
         .then((res) => {
@@ -186,14 +191,17 @@ const state = {
         })
         .then((data) => {
           currentState.online = true;
+          console.log("data de asknewroom", data.rtdbRoomId);
           currentState.roomId = data.roomId;
-          currentState.rtdbRoomId = data.rtdbRoomId;
+          // currentState.rtdbRoomId = data.rtdbRoomId;
+
+          // this.setState(currentState);
           if (cb) {
             cb();
           }
         });
     } else {
-      console.error("nohay id");
+      console.error("no hay id");
     }
   },
 
@@ -207,7 +215,11 @@ const state = {
         return res.json();
       })
       .then((data) => {
-        this.listenRoom();
+        console.log("Data del accessToRoom", data);
+        currentState.rtdbRoomId = data.rtdbRoomId;
+        // this.setState(currentState);
+        // this.listenRoom();
+
         if (cb) cb();
       });
   },
@@ -221,8 +233,8 @@ const state = {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        nombre: currentState.anotherPlayer,
-        playerId: currentState.anotherPlayerId,
+        nombre: currentState.nombre,
+        playerId: currentState.playerId,
       }),
     })
       .then((res) => {
