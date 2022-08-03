@@ -9,15 +9,34 @@ export function initScore() {
       const shadow = this.attachShadow({ mode: "open" });
       const div = document.createElement("div");
       const style = document.createElement("style");
-      const score = state.getScore();
-      div.innerHTML = `
-      <div class="container">
+      // const score = state.getScore();
+      if (state.getState().whoIAmP1 == "owner") {
+        div.innerHTML = `
+        <div class="container">
         <h3 class="title">Score</h3>
-        <custom-text class="text" variant="body">Vos: ${score.myScore}</custom-text>
-        <custom-text class="text" variant="body">Maquina: ${score.computerScore}</custom-text>
-      </div>
-      
-      `;
+        <custom-text class="text" variant="body">${state.getState().nombre}: ${
+          state.getState().score.owner
+        }</custom-text>
+        <custom-text class="text" variant="body">${
+          state.getState().anotherPlayer
+        }: ${state.getState().score.guess}</custom-text>
+        </div>
+        
+        `;
+      } else if (state.getState().whoIAmP1 == "guess") {
+        div.innerHTML = `
+        <div class="container">
+        <h3 class="title">Score</h3>
+        <custom-text class="text" variant="body">${
+          state.getState().anotherPlayer
+        }: ${state.getState().score.guess}</custom-text>
+        <custom-text class="text" variant="body">${state.getState().nombre}: ${
+          state.getState().score.owner
+        }</custom-text>
+        </div>
+        
+        `;
+      }
       style.innerHTML = `
       .container{
           display:flex;

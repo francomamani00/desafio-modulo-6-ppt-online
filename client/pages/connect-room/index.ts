@@ -31,15 +31,14 @@ customElements.define(
         currentState.nombre = target.input__name.value;
 
         state.signup(() => {
-          console.log("set-name -> signup");
           state.signin(() => {
-            console.log("set-name -> signin");
             state.accessToRoom(() => {
-              console.log("set-name -> accesstoroom");
               state.addPlayerDos(() => {
                 state.listenRoom(() => {
-                  Router.go("/instructions-page");
-                  console.log("connectroom-state", currentState);
+                  state.setGuess("guess", () => {
+                    Router.go("/share-id");
+                    console.log("connectroom-state", currentState);
+                  });
                 });
               });
             });
@@ -88,7 +87,7 @@ customElements.define(
           flex-direction:column;
           justify-content:space-between;
           align-items:center;
-          padding-top:80px;
+          padding-top:70px;
           padding-left: 20px;
           padding-right:20px;
         }

@@ -112,7 +112,7 @@ app.post("/rooms", (req, res) => {
                 nombre: "",
                 playerId: "",
                 online: false,
-                playerPLay: "",
+                playerPlay: "",
                 start: "",
               },
             ],
@@ -158,10 +158,9 @@ app.post("/rooms/:rtdbRoomId", (req, res) => {
   const playersRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
 
   playersRef.once("value", (snapshot) => {
-    console.log("falta 1 player", snapshot.val());
     const players = snapshot.val();
     const playersList = map(players);
-    console.log("playerlist[1]", playersList[1]);
+
     if (playersList[1].nombre != "") {
       res.status(400).json({
         message: "el room ya se encuentra lleno con:",
@@ -173,118 +172,74 @@ app.post("/rooms/:rtdbRoomId", (req, res) => {
       player2Ref.update(playerAdded);
       res.json({ message: "player added", playerAdded });
     }
-    console.log("ambos metidos", players);
-    // if (playersList.length >= 2) {
-    //   return res
-    //     .status(400)
-    //     .json({
-    //       message: "el room ya se encuentra lleno con:",
-    //       players: playersList,
-    //     });
-    // } else {
-    //   res.json({ message: "puede entrar unop mas" });
-    // }
-    // else {
-    //   const id = playersRef.push({
-    //     nombre: nombre,
-    //     playerId,
-    //     online: true,
-    //     playerPlay: "",
-    //     start: "",
-    //   }).key;
-    //   res.json(id);
-    // }
   });
 });
-//endpoint para obtener los jugadores de una rtdbRoomId ya creada
-// app.get("/rooms/:rtdbRoomId", (req, res) => {
-//   const { rtdbRoomId } = req.params;
-//   const playersRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
-//   playersRef.once("value", (snapshot) => {
+
+//este endpoint no lo uso
+// app.post("/rooms/:rtdbRoomId/players", (req, res) => {
+//   let myPlay = req.body.myPlay;
+//   let start = req.body.start;
+//   const rtdbRoomId = req.params.rtdbRoomId;
+//   const player = req.body;
+//   const newPlayer = [];
+
+//   if (player.aux == "start") {
+//     (myPlay = ""), (start = true);
+//   }
+//   const playerRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
+//   playerRef.once("value", (snapshot) => {
 //     const players = snapshot.val();
-//     res.json(map(players));
+//     const playersList = map(players);
+//     playersList.forEach((element: any, index) => {
+//       console.log("soy element", element);
+//       if (element.nombre == player.nombre) {
+//         newPlayer.push({
+//           nombre: player.nombre,
+//           playerId: player.playerId,
+//           roomId: player.roomId,
+//           online: true,
+//           myPlay: player.myPlay,
+//           start: start,
+//           serverId: index.toString(),
+//         });
+//       } else {
+//         newPlayer.push(element);
+//       }
+//     });
+//     playerRef.set(newPlayer).then((err) => {
+//       if (player.aux == "play") {
+//         contador++;
+//         if (contador == 2) {
+//           const player1 = {
+//             nombre: newPlayer[0].nombre,
+//             myPlay: newPlayer[0].myPlay,
+//           };
+//           const player2 = {
+//             nombre: newPlayer[1].nombre,
+//             myPlay: newPlayer[1].myPlay,
+//           };
+//           const jugada = { player1, player2 };
+//           let data;
+//           roomCollection
+//             .doc(newPlayer[0].roomId)
+//             .get()
+//             .then((snap) => {
+//               data = snap.data();
+//               data.history.push(jugada);
+
+//               roomCollection
+//                 .doc(newPlayer[0].roomId)
+//                 .set(data)
+//                 .then(() => {});
+//             });
+//           contador = 0;
+//         }
+//       }
+//       res.json("terminado");
+//     });
 //   });
 // });
-let contador = 0;
 
-app.post("/rooms/:rtdbRoomId/players", (req, res) => {
-  let myPlay = req.body.myPlay;
-  let start = req.body.start;
-  const rtdbRoomId = req.params.rtdbRoomId;
-  const player = req.body;
-  const newPlayer = [];
-
-  if (player.aux == "start") {
-    (myPlay = ""), (start = true);
-  }
-  const playerRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
-  playerRef.once("value", (snapshot) => {
-    const players = snapshot.val();
-    const playersList = map(players);
-    playersList.forEach((element: any, index) => {
-      console.log("soy element", element);
-      if (element.nombre == player.nombre) {
-        newPlayer.push({
-          nombre: player.nombre,
-          playerId: player.playerId,
-          roomId: player.roomId,
-          online: true,
-          myPlay: player.myPlay,
-          start: start,
-          serverId: index.toString(),
-        });
-      } else {
-        newPlayer.push(element);
-      }
-    });
-    playerRef.set(newPlayer).then((err) => {
-      if (player.aux == "play") {
-        contador++;
-        if (contador == 2) {
-          const player1 = {
-            nombre: newPlayer[0].nombre,
-            myPlay: newPlayer[0].myPlay,
-          };
-          const player2 = {
-            nombre: newPlayer[1].nombre,
-            myPlay: newPlayer[1].myPlay,
-          };
-          const jugada = { player1, player2 };
-          let data;
-          roomCollection
-            .doc(newPlayer[0].roomId)
-            .get()
-            .then((snap) => {
-              data = snap.data();
-              data.history.push(jugada);
-
-              roomCollection
-                .doc(newPlayer[0].roomId)
-                .set(data)
-                .then(() => {});
-            });
-          contador = 0;
-        }
-      }
-      res.json("terminado");
-    });
-  });
-});
-// app.get("/rooms/:roomId", (req, res) => {
-//   const { roomId } = req.params;
-//   const { playerId } = req.query;
-
-//   roomCollection
-//     .doc(roomId)
-//     .get()
-//     .then((snap) => {
-//       const data = snap.data();
-//       res.json({
-//         data,
-//         message: "hola",
-//       });
-//     });
-// });
 app.get("/rooms/:roomId", (req, res) => {
   const { playerId } = req.query;
   const { roomId } = req.params;
@@ -298,7 +253,6 @@ app.get("/rooms/:roomId", (req, res) => {
           .get()
           .then((snap) => {
             const data = snap.data();
-            console.log(data);
             res.json(data);
           });
       } else {
@@ -308,8 +262,43 @@ app.get("/rooms/:roomId", (req, res) => {
       }
     });
 });
-// const rutaRelativa = path.resolve(__dirname, "../dist/index.html");
+//endpoint para obtener history, lo uso en la page game
+app.get("/history/:roomId", (req, res) => {
+  const { roomId } = req.params;
 
+  let data;
+  roomCollection
+    .doc(roomId)
+    .get()
+    .then((snap) => {
+      data = snap.data();
+      res.json(data);
+    });
+});
+
+//endpoint para cambiar player 1
+app.post("/change-data-player1/:rtdbRoomId", (req, res) => {
+  const { rtdbRoomId } = req.params;
+
+  const playersRef1 = rtdb.ref("/rooms/" + rtdbRoomId + "/players/0");
+  playersRef1.update(req.body, function (err) {
+    console.log(err);
+
+    res.json("player1 cambio start:true");
+  });
+});
+//endpoint para cambiar player 2
+app.post("/change-data-player2/:rtdbRoomId", (req, res) => {
+  const { rtdbRoomId } = req.params;
+
+  const playersRef2 = rtdb.ref("/rooms/" + rtdbRoomId + "/players/1");
+  playersRef2.update(req.body, function (err) {
+    console.log(err);
+
+    res.json("player2 cambio start:true");
+  });
+});
+// const rutaRelativa = path.resolve(__dirname, "../dist/index.html");
 // app.get("*", (req, res) => {
 //     res.sendFile(rutaRelativa);
 //   });

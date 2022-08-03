@@ -4,9 +4,12 @@ import map from "lodash";
 import { callbackify } from "util";
 const API_BASE_URL = "http://localhost:3000";
 type Jugada = "piedra" | "tijera" | "papel";
-
+type WhoIAm = "owner" | "guess";
 const state = {
   data: {
+    whoIAmP1: "",
+    originalPlay: "",
+    actualWhoWinP1: "",
     nombre: "",
     playerId: "",
     online: "",
@@ -23,8 +26,13 @@ const state = {
     anotherScore: "",
     serverKey: "",
     serverId: "",
-    history: [],
     listeners: [],
+    history: [],
+    score: {
+      owner: 0,
+      guess: 0,
+      empates:0
+    },
   },
 
   init() {
@@ -41,18 +49,22 @@ const state = {
       const playersList = map(players);
       //esto invente yo
       console.log("jugadoresssss", players);
+
       playersList.forEach((element, index) => {
         if (element.nombre != currentState.nombre) {
           currentState.anotherPlayer = players[1].nombre;
           currentState.anotherPlayerId = players[1].playerId;
           currentState.anotherPlayerOnline = players[1].online;
-          currentState.anotherPlayerPlay = players[1].myPlay;
+          currentState.anotherPlayerPlay = players[1].playerPlay;
           currentState.anotherStart = players[1].start;
+          currentState.nombre = players[0].nombre;
+          currentState.playerId = players[0].playerId;
+          currentState.online = players[0].online;
+          currentState.myPlay = players[0].playerPlay;
+          currentState.start = players[0].start;
         }
       });
-      playersList.forEach((element, index) => {
-        console.log("for each: player->", element, "posicion", index);
-      });
+
       // playersList.forEach((element, index) => {
       //   if (element.nombre == currentState.nombre) {
       //     currentState.serverId = index.toString();
@@ -76,6 +88,7 @@ const state = {
   setState(newState) {
     this.data = newState;
     console.log("soy el state, he cambiado", this.data);
+    this.pushToHistory();
   },
   cleanState() {
     localStorage.setItem(
@@ -143,7 +156,7 @@ const state = {
         })
         .then((data) => {
           currentState.playerId = data.playerId;
-          console.log("signin", currentState);
+
           cb();
         });
     } else {
@@ -171,11 +184,21 @@ const state = {
       cb(true);
     }
   },
-
+  setOwner(whoIAm: WhoIAm, cb) {
+    const cs = this.getState();
+    cs.whoIAmP1 = whoIAm;
+    this.setState(cs);
+    if (cb) cb();
+  },
+  setGuess(whoIAm: WhoIAm, cb) {
+    const cs = this.getState();
+    cs.whoIAmP1 = whoIAm;
+    this.setState(cs);
+    if (cb) cb();
+  },
   askNewRoom(cb?) {
     const currentState = this.getState();
     if (currentState.playerId) {
-      console.log("id del que crea la sala", currentState.playerId);
       fetch(API_BASE_URL + "/rooms", {
         method: "post",
         headers: {
@@ -191,7 +214,7 @@ const state = {
         })
         .then((data) => {
           currentState.online = true;
-          console.log("data de asknewroom", data.rtdbRoomId);
+
           currentState.roomId = data.roomId;
           // currentState.rtdbRoomId = data.rtdbRoomId;
 
@@ -215,7 +238,6 @@ const state = {
         return res.json();
       })
       .then((data) => {
-        console.log("Data del accessToRoom", data);
         currentState.rtdbRoomId = data.rtdbRoomId;
         // this.setState(currentState);
         // this.listenRoom();
@@ -242,16 +264,75 @@ const state = {
       })
       .then((data) => {
         currentState.serverId = data;
-        console.log("server id del state", currentState.serverId);
+
         cb();
       });
   },
+  changeStartPlayer1() {
+    const currentState = this.getState();
+    const rtdbRoomId = currentState.rtdbRoomId;
+
+    fetch(API_BASE_URL + "/change-data-player1/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        start: true,
+      }),
+    });
+    currentState.start = true;
+    this.setState(currentState);
+  },
+  changeStartPlayer2() {
+    const currentState = this.getState();
+    const rtdbRoomId = currentState.rtdbRoomId;
+
+    fetch(API_BASE_URL + "/change-data-player2/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        start: true,
+      }),
+    });
+    currentState.anotherStart = true;
+    this.setState(currentState);
+  },
+  eleminarRtdbDataReady(cb) {
+    const currentState = this.getState();
+    const rtdbRoomId = currentState.rtdbRoomId;
+
+    fetch(API_BASE_URL + "/change-data-player1/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        start: false,
+      }),
+    });
+    fetch(API_BASE_URL + "/change-data-player2/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        start: false,
+      }),
+    });
+    currentState.start = false;
+    currentState.anotherStart = false;
+    this.setState(currentState);
+    if (cb) cb();
+  },
+  //no lo uso a este endpoint
   changeStart(auxiliar, cb) {
     const currentState = state.getState();
 
     const rtdbRoomId = currentState.rtdbRoomId;
 
-    console.log("/rooms/" + rtdbRoomId + "/players");
     fetch(API_BASE_URL + "/rooms/" + rtdbRoomId + "/players", {
       method: "post",
       headers: {
@@ -279,40 +360,151 @@ const state = {
       });
   },
 
-  setMove(move: Jugada) {
+  setMove(move: Jugada, cb?) {
     const currentState = state.getState();
-    currentState.myPlay = move;
-
-    this.changeStart();
+    currentState.originalPlay = move;
+    // this.setState();
+    // this.changeStart();
+    if (cb) cb();
   },
-  getHistory(cb) {
+  setMovePlayer1(move: Jugada, cb) {
+    const currentState = this.getState();
+    console.log(currentState);
+    currentState.myPlay = move;
+    // this.setState();
+
+    if (cb) cb();
+  },
+  setMovePlayer2(move: Jugada, cb) {
+    const currentState = this.getState();
+    currentState.anotherPlayerPlay = move;
+    // this.setState();
+    console.log("setmoveplayer2", currentState);
+    if (cb) cb();
+  },
+  changePlayerPlayPlayer1(cb) {
+    const currentState = this.getState();
+ 
+    const rtdbRoomId = currentState.rtdbRoomId;
+
+    fetch(API_BASE_URL + "/change-data-player1/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        playerPlay: currentState.myPlay,
+      }),
+    });
+    if (cb) cb();
+  },
+  changePlayerPlayPlayer2(cb) {
+    const currentState = this.getState();
+ 
+    const rtdbRoomId = currentState.rtdbRoomId;
+
+    fetch(API_BASE_URL + "/change-data-player2/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        playerPlay: currentState.anotherPlayerPlay,
+      }),
+    });
+    if (cb) cb();
+  },
+  //funcion para eliminar la data si es q se acaba el tiempo y uno o ambos jugadores no jugaron
+  eleminarRtdbDataPlayers(cb?) {
+    const cs = this.getState();
+    const rtdbRoomId = cs.rtdbRoomId;
+
+    fetch(API_BASE_URL + "/change-data-player1/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        playerPlay: "",
+      }),
+    });
+    fetch(API_BASE_URL + "/change-data-player2/" + `${rtdbRoomId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        playerPlay: "",
+      }),
+    });
+    cs.myPlay = "";
+    cs.anotherPlayerPlay = "";
+    this.setState(cs);
+    if (cb) cb();
+  },
+  getHistory(cb?) {
     const currentState = state.getState();
 
-    fetch("/rooms/" + currentState.roomId)
+    fetch(API_BASE_URL + "/history/" + currentState.roomId)
       .then((res) => {
         return res.json();
       })
       .then((data) => {
         currentState.history = data.history;
+
       });
     if (cb) cb();
   },
-  getScore(cb) {
+  //NO USO ESTO POR AHORA
+  // getScoreDeFirebase(cb?) {
+  //   const currentState = state.getState();
+
+  //   fetch(API_BASE_URL + "/history/" + currentState.roomId)
+  //     .then((res) => {
+  //       return res.json();
+  //     })
+  //     .then((data) => {
+  //       currentState.score.player1 = data.scorePlayer1;
+  //       currentState.score.player2 = data.scorePlayer2;
+
+  //       console.log("lista vacia de history", currentState.history);
+  //     });
+  //   if (cb) cb();
+  // },
+  //NO USO ESTO POR AHORA
+  // changeScoreDelFirebase(callback, scoreP1, scoreP2) {
+  //   const cs = this.getState();
+  //   const roomId = cs.roomId;
+  //   // let scoreP1 = cs.history.player1;
+  //   // let scoreP2 = cs.history.player2;
+
+  //   fetch(`${API_BASE_URL}/rooms/score`, {
+  //     method: "PUT",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ id: roomId, player1: scoreP1, player2: scoreP2 }),
+  //   })
+  //     .then(data => {
+  //       return data.json();
+  //     })
+  //     .then(res => {
+  //       this.getScore(callback);
+  //       return res;
+  //     });
+  // },
+  getScore(cb?) {
     let scorePlayerOne = 0;
     let scorePlayerTwo = 0;
     let currentState = this.getState();
     let history = this.data.history;
-    console.log(history);
+
     for (const s of history) {
       if (currentState.nombre == s.player1.nombre) {
-        if (
-          this.whoWins(s.player1.myPlay, s.player2.computerPlay) == "ganaste"
-        ) {
+        if (this.whoWins(s.player1.myPlay, s.player2.myPlay) == "ganaste") {
           scorePlayerOne++;
         }
-        if (
-          this.whoWins(s.player1.myPlay, s.player2.computerPlay) == "perdiste"
-        ) {
+        if (this.whoWins(s.player1.myPlay, s.player2.myPlay) == "perdiste") {
           scorePlayerTwo++;
         }
       }
@@ -338,51 +530,80 @@ const state = {
     ) {
       scorePlayerTwo++;
     }
+    if (currentState.actualWhoWinP1 == "ganaste") {
+      currentState.score.owner = currentState.score.owner + 1;
+    }
+    if (currentState.actualWhoWinP1 == "perdiste") {
+      currentState.score.guess = currentState.score.guess + 1;
+    }
+    if (currentState.actualWhoWinP1 == "empataste") {
+      currentState.score.empates = currentState.score.empates + 1;
+    }
+    // currentState.score.player1 = scorePlayerOne;
+    // currentState.score.player2 = scorePlayerTwo;
     currentState.myScore = scorePlayerOne;
     currentState.anotherScore = scorePlayerTwo;
     state.pushToHistory();
     if (cb) cb();
-    return { scorePlayerOne, scorePlayerTwo };
   },
   whoWins(myPlay: Jugada, anotherPlayerPlay: Jugada) {
+    let currentState = this.getState();
     if (myPlay == "piedra") {
       if (anotherPlayerPlay == "papel") {
+        currentState.actualWhoWinP1 = "perdiste";
         return "perdiste";
       }
       if (anotherPlayerPlay == "tijera") {
+        currentState.actualWhoWinP1 = "ganaste";
+
         return "ganaste";
       }
       if (anotherPlayerPlay == "piedra") {
+        currentState.actualWhoWinP1 = "empataste";
+
         return "empataste";
       }
     }
 
     if (myPlay == "papel") {
       if (anotherPlayerPlay == "tijera") {
+        currentState.actualWhoWinP1 = "perdiste";
+
         return "perdiste";
       }
       if (anotherPlayerPlay == "piedra") {
+        currentState.actualWhoWinP1 = "ganaste";
+
         return "ganaste";
       }
       if (anotherPlayerPlay == "papel") {
+        currentState.actualWhoWinP1 = "empataste";
+
         return "empataste";
       }
     }
     if (myPlay == "tijera") {
       if (anotherPlayerPlay == "piedra") {
+        currentState.actualWhoWinP1 = "perdiste";
+
         return "perdiste";
       }
       if (anotherPlayerPlay == "papel") {
+        currentState.actualWhoWinP1 = "ganaste";
+
         return "ganaste";
       }
       if (anotherPlayerPlay == "tijera") {
+        currentState.actualWhoWinP1 = "empataste";
+
         return "empataste";
       }
     }
+    this.setState(currentState);
   },
   pushToHistory() {
     const currentState = this.getState();
-    localStorage.setItem("saved-state", JSON.stringify(currentState));
+    localStorage.setItem("saved-state", JSON.stringify(currentState.score));
   },
   prueba(cb) {
     console.log("si llega a la prueba");

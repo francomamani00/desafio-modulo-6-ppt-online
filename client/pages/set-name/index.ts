@@ -40,11 +40,13 @@ customElements.define(
                   console.log("set-name -> accesstoroom");
 
                   state.listenRoom(() => {
-                    console.log("set-name -> listenRoom");
+                    state.setOwner("owner", () => {
+                      console.log("set-name -> listenRoom");
 
-                    console.log(currentState);
+                      console.log(currentState);
 
-                    Router.go("/share-id");
+                      Router.go("/share-id");
+                    });
                   });
                 });
               });
@@ -103,7 +105,7 @@ customElements.define(
           flex-direction:column;
           justify-content:space-between;
           align-items:center;
-          padding-top:80px;
+          padding-top:70px;
           padding-left: 20px;
           padding-right:20px;
         }

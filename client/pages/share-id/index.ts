@@ -12,11 +12,39 @@ customElements.define(
       this.addListeners();
     }
     addListeners() {
-      const buttonEl = this.querySelector(".instructions__button");
-      buttonEl?.addEventListener("click", (e) => {
-        e.preventDefault;
-        Router.go("/instructions-page");
-      });
+      const buttonEl = this.querySelector(".instruction__button");
+      if (state.getState().whoIAmP1 == "owner") {
+        const intervalo = setInterval(() => {
+          if (state.getState().anotherPlayer != "") {
+            //cs.anotherOnline == true nomas
+            clearInterval(intervalo);
+            console.log("res");
+            Router.go("/instructions-page");
+          } else {
+            buttonEl.addEventListener("click", (e) => {
+              console.log("aprete el boton");
+              e.preventDefault();
+              Router.go("/instructions-page");
+            });
+          }
+        }, 500);
+      } else if (state.getState().whoIAmP1 == "guess") {
+        const intervalo1 = setInterval(() => {
+          if (state.getState().anotherPlayer != "") {
+            clearInterval(intervalo1);
+            Router.go("/instructions-page");
+          }
+        }, 100);
+      }
+      // if (state.getState().anotherPlayer != "") {
+      //   console.log("cambio anotherplayer, por lo tanto va a instructionspage");
+      //   Router.go("/instructions-page");
+      // } else {
+      //   buttonEl?.addEventListener("click", (e) => {
+      //     e.preventDefault();
+      //     Router.go("/instructions-page");
+      //   });
+      // }
     }
     render() {
       this.innerHTML = `
@@ -26,7 +54,7 @@ customElements.define(
         <custom-text variant="subtitle">${state.getState().roomId}</custom-text>
       </div>
       <div class="instructions__container-button">
-          <button-comp class="instructions__button">Continuar</button-comp>
+          <button-comp class="instruction__button">Continuar</button-comp>
       </div>
 
       <div class="instructions__container-ppt">
@@ -89,7 +117,8 @@ customElements.define(
       }
         `;
       this.appendChild(style);
-      this.addListeners();
+      // this.addListeners();
+      // lo
     }
   }
 );

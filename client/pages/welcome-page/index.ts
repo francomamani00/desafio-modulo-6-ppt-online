@@ -14,7 +14,7 @@ customElements.define(
       const newRoomEl = this.querySelector("#new-room");
       newRoomEl.addEventListener("click", (e) => {
         e.preventDefault;
-        
+
         // state.askNewRoom();
         Router.go("/set-name");
       });
@@ -58,7 +58,7 @@ customElements.define(
         flex-direction:column;
         justify-content:space-between;
         align-items:center;
-        padding-top:80px;
+        padding-top:70px;
         padding-left: 20px;
         padding-right:20px;
       }
@@ -96,7 +96,8 @@ customElements.define(
       
       `;
       this.appendChild(style);
-      this.addListeners();
+      // this.addListeners();
+      // lo saque recien
     }
   }
 );
