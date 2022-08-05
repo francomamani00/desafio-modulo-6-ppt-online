@@ -1,7 +1,6 @@
 {
   "name": "8-desafio-del-modulo",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^18.0.6",
@@ -20,7 +19,6 @@
   "scripts": {
     "dev:api": "nodemon --watch ./server/index.ts --exec ts-node ./server/dev.ts",
     "dev:front": "parcel serve ./client/index.html",
-    "test": "ava",
     "build:api": "tsc ./server/index.ts",
     "build:front": "parcel build ./client/index.html",
     "build": "yarn build:api && yarn build:front",
