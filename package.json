@@ -7,6 +7,7 @@
     "@types/node": "^18.0.6",
     "@vaadin/router": "^1.7.4",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "firebase": "^9.9.1",
     "firebase-admin": "^11.0.0",
@@ -17,8 +18,13 @@
     "uuid": "^8.3.2"
   },
   "scripts": {
-    "dev": "nodemon --watch ./server/index.ts --exec ts-node ./server/index.ts",
-    "dev:front": "parcel serve ./client/index.html"
+    "dev:api": "nodemon --watch ./server/index.ts --exec ts-node ./server/dev.ts",
+    "dev:front": "parcel serve ./client/index.html",
+    "test": "ava",
+    "build:api": "tsc ./server/index.ts",
+    "build:front": "parcel build ./client/index.html",
+    "build": "yarn build:api && yarn build:front",
+    "start": "node ./server/index.js"
   },
   "devDependencies": {
     "@parcel/transformer-image": "2.0.0-rc.0"

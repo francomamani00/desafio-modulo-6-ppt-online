@@ -6,6 +6,7 @@ import { json } from "body-parser";
 import { v4 as uuidv4 } from "uuid";
 import * as cors from "cors";
 import { map } from "lodash";
+import * as path from "path";
 // import { nanoid } from "nanoid";
 // import { nanoid } from "nanoid";
 const app = express();
@@ -298,10 +299,10 @@ app.post("/change-data-player2/:rtdbRoomId", (req, res) => {
     res.json("player2 cambio start:true");
   });
 });
-// const rutaRelativa = path.resolve(__dirname, "../dist/index.html");
-// app.get("*", (req, res) => {
-//     res.sendFile(rutaRelativa);
-//   });
+const rutaRelativa = path.resolve(__dirname, "../dist/index.html");
+app.get("*", (req, res) => {
+  res.sendFile(rutaRelativa);
+});
 app.listen(port, () => {
   console.log(`example listening at http://localhost:${port}`);
 });
