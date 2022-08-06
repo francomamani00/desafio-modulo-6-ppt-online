@@ -1,140 +1,138 @@
-"use strict";
-exports.__esModule = true;
-var express = require("express");
+import * as express from "express";
 // var express = require("express");
-var db_1 = require("./db");
-var db_2 = require("./db");
-var uuid_1 = require("uuid");
-var cors = require("cors");
-var lodash_1 = require("lodash");
-var path = require("path");
+import { firestore } from "./db";
+import { rtdb } from "./db";
+import { v4 as uuidv4 } from "uuid";
+import * as cors from "cors";
+import { map } from "lodash";
+import * as path from "path";
 // import { nanoid } from "nanoid";
 // import { nanoid } from "nanoid";
-var app = express();
+const app = express();
 app.use(express.static("dist"));
 app.use(express.json());
-var port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 app.use(cors());
-var playersCollection = db_1.firestore.collection("players");
-var roomCollection = db_1.firestore.collection("rooms");
+const playersCollection = firestore.collection("players");
+const roomCollection = firestore.collection("rooms");
 console.log("api holaa indexts");
-app.get("/players", function (req, res) {
+app.get("/players", (req, res) => {
     res.json({
-        message: {}
+        message: {},
     });
 });
-app.get("/players/:playerId", function (req, res) {
-    var playerId = req.params.playerId;
-    var playerDoc = playersCollection.doc(playerId);
-    playerDoc.get().then(function (snap) {
-        var playerData = snap.data();
+app.get("/players/:playerId", (req, res) => {
+    const playerId = req.params.playerId;
+    const playerDoc = playersCollection.doc(playerId);
+    playerDoc.get().then((snap) => {
+        const playerData = snap.data();
         res.json(playerData);
     });
 });
-app.post("/players", function (req, res) {
-    var newPlayerDoc = playersCollection.doc();
-    newPlayerDoc.create(req.body).then(function () {
+app.post("/players", (req, res) => {
+    const newPlayerDoc = playersCollection.doc();
+    newPlayerDoc.create(req.body).then(() => {
         res.status(201).json({
-            id: newPlayerDoc.id
+            id: newPlayerDoc.id,
         });
     });
 });
-app.post("/signup", function (req, res) {
-    var nombre = req.body.nombre;
+app.post("/signup", (req, res) => {
+    const nombre = req.body.nombre;
     playersCollection
         .where("nombre", "==", nombre)
         .get()
-        .then(function (result) {
+        .then((result) => {
         if (result.empty) {
             playersCollection
                 .add({
-                nombre: nombre
+                nombre: nombre,
             })
-                .then(function (newPlayerRef) {
+                .then((newPlayerRef) => {
                 res.json({
                     playerId: newPlayerRef.id,
-                    "new": true
+                    new: true,
                 });
             });
         }
         else {
             res.status(400).json({
-                message: "player already exists"
+                message: "player already exists",
             });
         }
     });
 });
-app.post("/auth", function (req, res) {
-    var nombre = req.body.nombre;
+app.post("/auth", (req, res) => {
+    const { nombre } = req.body;
     playersCollection
         .where("nombre", "==", nombre)
         .get()
-        .then(function (result) {
+        .then((result) => {
         if (result.empty) {
             res.status(404).json({
-                message: "not found"
+                message: "not found",
             });
         }
         else {
             res.json({
-                playerId: result.docs[0].id
+                playerId: result.docs[0].id,
             });
         }
     });
 });
-app.post("/rooms", function (req, res) {
-    var playerId = req.body.playerId;
-    var nombre = req.body.nombre;
+app.post("/rooms", (req, res) => {
+    const { playerId } = req.body;
+    const { nombre } = req.body;
     playersCollection
         .doc(playerId.toString())
         .get()
-        .then(function (doc) {
-        var roomRef = db_2.rtdb.ref("/rooms/" + (0, uuid_1.v4)());
+        .then((doc) => {
+        const roomRef = rtdb.ref("/rooms/" + uuidv4());
         console.log("player owner", doc.data(), "playerid", doc.id, "room creado", roomRef.key);
         if (doc.exists) {
             roomRef
                 .set({
                 players: [
                     {
-                        nombre: nombre,
-                        playerId: playerId,
+                        nombre,
+                        playerId,
                         online: true,
                         playerPlay: "",
-                        start: ""
+                        start: "",
                     },
                     {
                         nombre: "",
                         playerId: "",
                         online: false,
                         playerPlay: "",
-                        start: ""
+                        start: "",
                     },
                 ],
                 roomId: "",
-                rtdbRoomId: ""
+                rtdbRoomId: "",
             })
-                .then(function () {
-                var longRoomId = roomRef.key;
-                var roomId = 1000 + Math.floor(Math.random() * 999);
+                .then(() => {
+                const longRoomId = roomRef.key;
+                const roomId = 1000 + Math.floor(Math.random() * 999);
                 roomRef.update({ roomId: roomId, rtdbRoomId: longRoomId });
                 roomCollection
                     .doc(roomId.toString())
                     .set({
                     rtdbRoomId: longRoomId,
                     owner: nombre,
-                    history: []
+                    history: [],
                 })
-                    .then(function () {
+                    .then(() => {
                     res.json({
                         roomId: roomId.toString(),
-                        rtdbRoomId: longRoomId.toString()
+                        rtdbRoomId: longRoomId.toString(),
                     });
                 });
             });
         }
         else {
             res.status(401).json({
-                message: "do not exist"
+                message: "do not exist",
             });
         }
     });
@@ -143,25 +141,25 @@ app.post("/rooms", function (req, res) {
 //Con este post se crea un "jugador" en una room especifica
 //
 //un roomId como paraámetro este debe ser el roomIdReal el cual deberia estar guardado en el state
-app.post("/rooms/:rtdbRoomId", function (req, res) {
-    var rtdbRoomId = req.params.rtdbRoomId;
-    var nombre = req.body.nombre;
-    var playerId = req.body.playerId;
-    var playersRef = db_2.rtdb.ref("/rooms/" + rtdbRoomId + "/players");
-    playersRef.once("value", function (snapshot) {
-        var players = snapshot.val();
-        var playersList = (0, lodash_1.map)(players);
+app.post("/rooms/:rtdbRoomId", (req, res) => {
+    const { rtdbRoomId } = req.params;
+    const { nombre } = req.body;
+    const { playerId } = req.body;
+    const playersRef = rtdb.ref("/rooms/" + rtdbRoomId + "/players");
+    playersRef.once("value", (snapshot) => {
+        const players = snapshot.val();
+        const playersList = map(players);
         if (playersList[1].nombre != "") {
             res.status(400).json({
                 message: "el room ya se encuentra lleno con:",
-                players: playersList
+                players: playersList,
             });
         }
         else {
-            var player2Ref = db_2.rtdb.ref("/rooms/" + rtdbRoomId + "/players/1");
-            var playerAdded = { nombre: nombre, playerId: playerId, online: true };
+            const player2Ref = rtdb.ref("/rooms/" + rtdbRoomId + "/players/1");
+            let playerAdded = { nombre, playerId, online: true };
             player2Ref.update(playerAdded);
-            res.json({ message: "player added", playerAdded: playerAdded });
+            res.json({ message: "player added", playerAdded });
         }
     });
 });
@@ -227,63 +225,63 @@ app.post("/rooms/:rtdbRoomId", function (req, res) {
 //     });
 //   });
 // });
-app.get("/rooms/:roomId", function (req, res) {
-    var playerId = req.query.playerId;
-    var roomId = req.params.roomId;
+app.get("/rooms/:roomId", (req, res) => {
+    const { playerId } = req.query;
+    const { roomId } = req.params;
     playersCollection
         .doc(playerId.toString())
         .get()
-        .then(function (doc) {
+        .then((doc) => {
         if (doc.exists) {
             roomCollection
                 .doc(roomId)
                 .get()
-                .then(function (snap) {
-                var data = snap.data();
+                .then((snap) => {
+                const data = snap.data();
                 res.json(data);
             });
         }
         else {
             res.status(401).json({
-                messages: "noexistis"
+                messages: "noexistis",
             });
         }
     });
 });
 //endpoint para obtener history, lo uso en la page game
-app.get("/history/:roomId", function (req, res) {
-    var roomId = req.params.roomId;
-    var data;
+app.get("/history/:roomId", (req, res) => {
+    const { roomId } = req.params;
+    let data;
     roomCollection
         .doc(roomId)
         .get()
-        .then(function (snap) {
+        .then((snap) => {
         data = snap.data();
         res.json(data);
     });
 });
 //endpoint para cambiar player 1
-app.post("/change-data-player1/:rtdbRoomId", function (req, res) {
-    var rtdbRoomId = req.params.rtdbRoomId;
-    var playersRef1 = db_2.rtdb.ref("/rooms/" + rtdbRoomId + "/players/0");
+app.post("/change-data-player1/:rtdbRoomId", (req, res) => {
+    const { rtdbRoomId } = req.params;
+    const playersRef1 = rtdb.ref("/rooms/" + rtdbRoomId + "/players/0");
     playersRef1.update(req.body, function (err) {
         console.log(err);
         res.json("player1 cambio start:true");
     });
 });
 //endpoint para cambiar player 2
-app.post("/change-data-player2/:rtdbRoomId", function (req, res) {
-    var rtdbRoomId = req.params.rtdbRoomId;
-    var playersRef2 = db_2.rtdb.ref("/rooms/" + rtdbRoomId + "/players/1");
+app.post("/change-data-player2/:rtdbRoomId", (req, res) => {
+    const { rtdbRoomId } = req.params;
+    const playersRef2 = rtdb.ref("/rooms/" + rtdbRoomId + "/players/1");
     playersRef2.update(req.body, function (err) {
         console.log(err);
         res.json("player2 cambio start:true");
     });
 });
-var rutaRelativa = path.resolve(__dirname, "../dist/index.html");
-app.get("*", function (req, res) {
+const rutaRelativa = path.resolve(__dirname, "../dist/index.html");
+app.get("*", (req, res) => {
     res.sendFile(rutaRelativa);
 });
-app.listen(port, function () {
-    console.log("example listening at http://localhost:".concat(port));
+app.listen(port, () => {
+    console.log(`example listening at http://localhost:${port}`);
 });

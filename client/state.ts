@@ -1,7 +1,7 @@
 import { rtdb } from "./rtdb";
 import { ref, onValue } from "firebase/database";
-import map from "lodash";
-import { callbackify } from "util";
+import map from "lodash/map";
+// import { callbackify } from "util";
 const API_BASE_URL = "http://localhost:3000";
 type Jugada = "piedra" | "tijera" | "papel";
 type WhoIAm = "owner" | "guess";
@@ -31,7 +31,7 @@ const state = {
     score: {
       owner: 0,
       guess: 0,
-      empates:0
+      empates: 0,
     },
   },
 
@@ -384,7 +384,7 @@ const state = {
   },
   changePlayerPlayPlayer1(cb) {
     const currentState = this.getState();
- 
+
     const rtdbRoomId = currentState.rtdbRoomId;
 
     fetch(API_BASE_URL + "/change-data-player1/" + `${rtdbRoomId}`, {
@@ -400,7 +400,7 @@ const state = {
   },
   changePlayerPlayPlayer2(cb) {
     const currentState = this.getState();
- 
+
     const rtdbRoomId = currentState.rtdbRoomId;
 
     fetch(API_BASE_URL + "/change-data-player2/" + `${rtdbRoomId}`, {
@@ -451,7 +451,6 @@ const state = {
       })
       .then((data) => {
         currentState.history = data.history;
-
       });
     if (cb) cb();
   },
