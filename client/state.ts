@@ -2,7 +2,7 @@ import { rtdb } from "./rtdb";
 import { ref, onValue } from "firebase/database";
 import map from "lodash/map";
 // import { callbackify } from "util";
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 type Jugada = "piedra" | "tijera" | "papel";
 type WhoIAm = "owner" | "guess";
 const state = {

@@ -32,10 +32,10 @@ customElements.define(
         <div class="data-room">
               
               <div class= "container-name">
-                <h3>${state.getState().nombre}:${
+                <h3>${state.getState().nombre}: ${
         state.getState().score.owner
       }</h3>
-                <h3>${state.getState().anotherPlayer}:${
+                <h3>${state.getState().anotherPlayer}: ${
         state.getState().score.guess
       }</h3>
               </div>
