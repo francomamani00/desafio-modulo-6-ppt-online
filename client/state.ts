@@ -76,7 +76,7 @@ const state = {
       //     currentState.anotherPlayerPlay = element.myPlay;
       //     currentState.anotherStart = element.start;
       //   }
-      // });
+
       this.setState(currentState);
       this.pushToHistory();
     });
