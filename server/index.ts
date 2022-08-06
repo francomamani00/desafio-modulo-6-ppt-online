@@ -16,7 +16,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 const playersCollection = firestore.collection("players");
 const roomCollection = firestore.collection("rooms");
-console.log("api holaa indexts");
+console.log("api holaa servidor");
 app.get("/players", (req, res) => {
   res.json({
     message: {},
