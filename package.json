@@ -2,6 +2,7 @@
   "name": "8-desafio-del-modulo",
   "version": "1.0.0",
   "license": "MIT",
+  "type": "commonjs",
   "dependencies": {
     "@types/node": "^18.0.6",
     "@vaadin/router": "^1.7.4",

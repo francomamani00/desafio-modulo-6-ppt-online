@@ -1,14 +1,14 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.rtdb = exports.firestore = void 0;
-var admin = require("firebase-admin");
+const admin = require("firebase-admin");
 // import * as serviceAccount from "./key.json";
-var serviceAccount = require("./key.json");
+const serviceAccount = require("./key.json");
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://apx-modulo-6-default-rtdb.firebaseio.com"
+    databaseURL: "https://apx-modulo-6-default-rtdb.firebaseio.com",
 });
-var firestore = admin.firestore();
+const firestore = admin.firestore();
 exports.firestore = firestore;
-var rtdb = admin.database();
+const rtdb = admin.database();
 exports.rtdb = rtdb;
