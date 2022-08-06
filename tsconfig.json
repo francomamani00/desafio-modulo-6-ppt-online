@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "moduleResolution": "node",
-    "target": "ES2022",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
-  },
-  "files": ["./server/index.ts"]
-}
