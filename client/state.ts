@@ -3,6 +3,7 @@ import { ref, onValue } from "firebase/database";
 import map from "lodash/map";
 // import { callbackify } from "util";
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
+console.log(API_BASE_URL);
 type Jugada = "piedra" | "tijera" | "papel";
 type WhoIAm = "owner" | "guess";
 const state = {
@@ -64,18 +65,6 @@ const state = {
           currentState.start = players[0].start;
         }
       });
-
-      // playersList.forEach((element, index) => {
-      //   if (element.nombre == currentState.nombre) {
-      //     currentState.serverId = index.toString();
-      //   }
-      //   if (element.nombre != currentState.nombre) {
-      //     currentState.anotherPlayer = element.nombre;
-      //     currentState.anotherPlayerId = element.playerId;
-      //     currentState.anotherPlayerOnline = element.online;
-      //     currentState.anotherPlayerPlay = element.myPlay;
-      //     currentState.anotherStart = element.start;
-      //   }
 
       this.setState(currentState);
       this.pushToHistory();
