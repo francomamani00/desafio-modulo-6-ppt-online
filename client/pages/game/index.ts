@@ -13,6 +13,9 @@ customElements.define(
     addListeners() {
       const cs = state.getState();
       const handComponents = this.querySelectorAll("#pointer");
+      const tijeraa: HTMLElement = this.querySelector(".tijeraa");
+      const papell: HTMLElement = this.querySelector(".papell");
+      const piedraa: HTMLElement = this.querySelector(".piedraa");
       let contador: any = this.querySelector(".contador");
       let boolean = false;
       handComponents.forEach((hand) => {
@@ -22,6 +25,12 @@ customElements.define(
           if (cs.whoIAmP1 == "owner") {
             if (type == "piedra") {
               console.log("elegiste piedra del owner");
+              piedraa.style.display = "initial";
+              piedraa.style.opacity = "1";
+              piedraa.style.cursor = "default";
+              piedraa.style.top = "30px";
+              papell.style.display = "none";
+              tijeraa.style.display = "none";
               state.setMove(type);
               //   cs.myPlay == type;
               state.setMovePlayer1(type, () => {
@@ -29,6 +38,12 @@ customElements.define(
               });
             } else if (type == "papel") {
               console.log("elegiste papel del owner");
+              papell.style.display = "initial";
+              papell.style.opacity = "1";
+              papell.style.cursor = "default";
+              papell.style.top = "30px";
+              piedraa.style.display = "none";
+              tijeraa.style.display = "none";
               state.setMove(type);
 
               //   cs.myPlay == type;
@@ -37,6 +52,12 @@ customElements.define(
               });
             } else if (type == "tijera") {
               console.log("elegiste tijera del owner");
+              tijeraa.style.display = "initial";
+              tijeraa.style.opacity = "1";
+              tijeraa.style.cursor = "default";
+              tijeraa.style.top = "30px";
+              papell.style.display = "none";
+              piedraa.style.display = "none";
               state.setMove(type);
 
               //   cs.myPlay == type;
@@ -51,6 +72,12 @@ customElements.define(
           } else if (cs.whoIAmP1 == "guess") {
             if (type == "piedra") {
               console.log("elegiste piedra del guess");
+              piedraa.style.display = "initial";
+              piedraa.style.opacity = "1";
+              piedraa.style.cursor = "default";
+              piedraa.style.top = "30px";
+              papell.style.display = "none";
+              tijeraa.style.display = "none";
               state.setMove(type);
 
               //   cs.anotherPlayerPlay == type;
@@ -59,6 +86,12 @@ customElements.define(
               });
             } else if (type == "papel") {
               console.log("elegiste papel del guess");
+              papell.style.display = "initial";
+              papell.style.opacity = "1";
+              papell.style.cursor = "default";
+              papell.style.top = "30px";
+              piedraa.style.display = "none";
+              tijeraa.style.display = "none";
               state.setMove(type);
 
               //   cs.anotherPlayerPlay == type;
@@ -67,6 +100,12 @@ customElements.define(
               });
             } else if (type == "tijera") {
               console.log("elegiste tijera del guess");
+              tijeraa.style.display = "initial";
+              tijeraa.style.opacity = "1";
+              tijeraa.style.cursor = "default";
+              tijeraa.style.top = "30px";
+              papell.style.display = "none";
+              piedraa.style.display = "none";
               state.setMove(type);
 
               //   cs.anotherPlayerPlay == type;
@@ -90,17 +129,6 @@ customElements.define(
               });
             }
           }, 3000);
-          //   state.changePlayerPlayPlayer2();
-
-          //   state.setState(cs);
-          //s
-          // if (type == "piedra") {
-          //   state.setMove("piedra", () => console.log(cs));
-          // } else if (type == "papel") {
-          //   state.setMove("papel", () => console.log(cs));
-          // } else if (type == "tijera") {
-          //   state.setMove("tijera", () => console.log(cs));
-          // }
         });
       });
 
@@ -108,9 +136,11 @@ customElements.define(
         if (
           boolean == false ||
           cs.anotherPlayerPlay == "" ||
-          cs.playerPLay == ""
+          cs.myPlay == ""
+          // cs.playerPLay == ""
         ) {
-          cs.myPlay = "";
+          cs.originalPlay = "";
+          // cs.myPlay = "";
           state.eleminarRtdbDataReady(() => {
             state.eleminarRtdbDataPlayers(() => {
               Router.go("/instructions-page");
@@ -126,9 +156,9 @@ customElements.define(
             <contador-comp class="contador"></contador-comp>
         </div>
         <div class="game__container-ppt">
-            <custom-piedra tipo="piedra"variant="small" id="pointer" class="elementos"></custom-piedra>
-            <custom-papel tipo="papel" variant="small" id="pointer" class="elementos"></custom-papel>
-            <custom-tijera tipo="tijera" variant="small" id="pointer" class="elementos"></custom-tijera>
+            <custom-piedra tipo="piedra"variant="small" id="pointer" class="elementos piedraa"></custom-piedra>
+            <custom-papel tipo="papel" variant="small" id="pointer" class="elementos papell"></custom-papel>
+            <custom-tijera tipo="tijera" variant="small" id="pointer" class="elementos tijeraa"></custom-tijera>
         </div>
     </section>
           `;
@@ -166,6 +196,12 @@ customElements.define(
         top:60px;
         cursor:pointer;
         padding:10px;
+        opacity:0.6;
+      }
+      .elementos:hover{
+        position:relative;
+        top:30px;
+        opacity:1;
       }
   
     `;
