@@ -63,8 +63,7 @@ customElements.define(
       const intervalo = setInterval(() => 1000);
       setTimeout(() => {
         state.eleminarRtdbDataReady(() => {
-          state.getHistory(() => {
-          });
+          state.getHistory(() => {});
         });
         clearInterval(intervalo);
         if (

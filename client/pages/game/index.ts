@@ -115,6 +115,7 @@ customElements.define(
             }
           }
           const intervalo = setInterval(() => {
+            console.log("entra al intervalo");
             if (
               state.getState().myPlay != "" &&
               state.getState().anotherPlayerPlay != ""
@@ -127,19 +128,33 @@ customElements.define(
                   Router.go("/results");
                 });
               });
+            } else if (
+              state.getState().myPlay == "" ||
+              state.getState().anotherPlayerPlay == ""
+            ) {
+              console.log("uno de los dos jugadores no jugo dsadsasadsda");
+              clearInterval(intervalo);
+              state.eleminarRtdbDataReady(() => {
+                state.eleminarRtdbDataPlayers(() => {
+                  Router.go("/instructions-page");
+                });
+              });
             }
-          }, 3000);
+          }, 3500);
         });
       });
-
+      //esto veo de sacar
       contador.addEventListener("change", (e: any) => {
+        console.log("cuando termina el contador", e.detail.numero);
         if (
           boolean == false ||
           cs.anotherPlayerPlay == "" ||
           cs.myPlay == ""
           // cs.playerPLay == ""
         ) {
-          cs.originalPlay = "";
+          console.log("boolean", boolean);
+          console.log("uno de los dos jugadores no jugo");
+          // cs.originalPlay = ""
           // cs.myPlay = "";
           state.eleminarRtdbDataReady(() => {
             state.eleminarRtdbDataPlayers(() => {
@@ -147,7 +162,12 @@ customElements.define(
             });
           });
         }
+        // esto para ver y arreglar el bug que tengo
+
+        // hasta aca
       });
+
+      // hasta aca
     }
     render() {
       this.innerHTML = `

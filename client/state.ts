@@ -236,7 +236,7 @@ const state = {
   },
 
   addPlayerDos(cb) {
-    const currentState = state.getState();
+    const currentState = this.getState();
     const rtdbRoomId = currentState.rtdbRoomId;
     fetch(API_BASE_URL + "/rooms/" + rtdbRoomId, {
       method: "post",
@@ -350,7 +350,7 @@ const state = {
   },
 
   setMove(move: Jugada, cb?) {
-    const currentState = state.getState();
+    const currentState = this.getState();
     currentState.originalPlay = move;
     // this.setState();
     // this.changeStart();
@@ -361,6 +361,8 @@ const state = {
     console.log(currentState);
     currentState.myPlay = move;
     // this.setState();
+    //recien agregado
+    this.setState(currentState);
 
     if (cb) cb();
   },
@@ -369,6 +371,8 @@ const state = {
     currentState.anotherPlayerPlay = move;
     // this.setState();
     console.log("setmoveplayer2", currentState);
+    //recien agregado
+    this.setState(currentState);
     if (cb) cb();
   },
   changePlayerPlayPlayer1(cb) {
@@ -428,6 +432,8 @@ const state = {
     });
     cs.myPlay = "";
     cs.anotherPlayerPlay = "";
+    cs.originalPlay = "";
+    cs.actualWhoWinP1 = "";
     this.setState(cs);
     if (cb) cb();
   },
@@ -531,6 +537,9 @@ const state = {
     // currentState.score.player2 = scorePlayerTwo;
     currentState.myScore = scorePlayerOne;
     currentState.anotherScore = scorePlayerTwo;
+    //recien agregue esto
+    this.setState(currentState);
+
     state.pushToHistory();
     if (cb) cb();
   },
@@ -539,17 +548,17 @@ const state = {
     if (myPlay == "piedra") {
       if (anotherPlayerPlay == "papel") {
         currentState.actualWhoWinP1 = "perdiste";
-        return "perdiste";
+        // return "perdiste";
       }
       if (anotherPlayerPlay == "tijera") {
         currentState.actualWhoWinP1 = "ganaste";
 
-        return "ganaste";
+        // return "ganaste";
       }
       if (anotherPlayerPlay == "piedra") {
         currentState.actualWhoWinP1 = "empataste";
 
-        return "empataste";
+        // return "empataste";
       }
     }
 
@@ -557,34 +566,34 @@ const state = {
       if (anotherPlayerPlay == "tijera") {
         currentState.actualWhoWinP1 = "perdiste";
 
-        return "perdiste";
+        // return "perdiste";
       }
       if (anotherPlayerPlay == "piedra") {
         currentState.actualWhoWinP1 = "ganaste";
 
-        return "ganaste";
+        // return "ganaste";
       }
       if (anotherPlayerPlay == "papel") {
         currentState.actualWhoWinP1 = "empataste";
 
-        return "empataste";
+        // return "empataste";
       }
     }
     if (myPlay == "tijera") {
       if (anotherPlayerPlay == "piedra") {
         currentState.actualWhoWinP1 = "perdiste";
 
-        return "perdiste";
+        // return "perdiste";
       }
       if (anotherPlayerPlay == "papel") {
         currentState.actualWhoWinP1 = "ganaste";
 
-        return "ganaste";
+        // return "ganaste";
       }
       if (anotherPlayerPlay == "tijera") {
         currentState.actualWhoWinP1 = "empataste";
 
-        return "empataste";
+        // return "empataste";
       }
     }
     this.setState(currentState);

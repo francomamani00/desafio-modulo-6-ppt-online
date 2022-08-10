@@ -22,10 +22,9 @@ customElements.define(
         ) {
           //cs.anotherOnline == true nomas
           clearInterval(intevarlo);
-
           Router.go("/game");
         }
-      }, 700);
+      }, 1000);
     }
     render() {
       if (state.getState().whoIAmP1 == "owner") {
